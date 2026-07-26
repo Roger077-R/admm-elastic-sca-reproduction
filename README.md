@@ -35,64 +35,52 @@ external forces, and collisions.
 
 ### 1. Backward Euler as minimization
 
-Let \(x^n\) and \(v^n\) be the current positions and velocities, \(M\) the
-diagonal mass matrix, and \(\Delta t\) the timestep. After explicit forces such
+Let $x^n$ and $v^n$ be the current positions and velocities, $M$ the
+diagonal mass matrix, and $\Delta t$ the timestep. After explicit forces such
 as gravity and wind update the velocity, the unconstrained prediction is
 
-```math
-\tilde{x} = x^n + \Delta t\,v^n.
-```
+$$\tilde{x} = x^n + \Delta t\,v^n.$$
 
 Implicit Euler can then be written as the minimization
 
-```math
-x^{n+1} = \underset{x}{\operatorname{argmin}}\;
-\frac{1}{2\Delta t^2}\lVert M^{1/2}(x-\tilde{x})\rVert^2
-+ \sum_i U_i(D_i x).
-```
+$$\begin{aligned} x^{n+1} = \operatorname*{argmin}_{x}\; &\frac{1}{2\Delta t^2}\left\lVert M^{1/2}(x-\tilde{x})\right\rVert^2 \\ &+ \sum_i U_i(D_i x). \end{aligned}$$
 
-Each \(D_i\) extracts a small element-local quantity from the global position
+Each $D_i$ extracts a small element-local quantity from the global position
 vector. For example, it can produce a spring edge, a triangle deformation
-gradient, or a tetrahedron deformation gradient. \(U_i\) is the corresponding
+gradient, or a tetrahedron deformation gradient. $U_i$ is the corresponding
 elastic energy or constraint.
 
-In the code, `System::step()` forms `x_bar` (the paper's \(\tilde{x}\)) and
-`M_xbar`, while `m_D` stores all \(D_i\) matrices stacked by rows.
+In the code, `System::step()` forms `x_bar` (the paper's $\tilde{x}$) and
+`M_xbar`, while `m_D` stores all $D_i$ matrices stacked by rows.
 
 ### 2. ADMM variable splitting
 
 The method introduces local variables
 
-```math
-z_i = D_i x
-```
+$$z_i = D_i x.$$
 
-and scaled dual variables \(u_i\). Stacking all local quantities gives
-\(z=Dx\) and \(u\). A diagonal weight matrix \(W\), assembled from per-force
-weights \(w_i\), controls the augmented-Lagrangian penalty and convergence.
+and scaled dual variables $u_i$. Stacking all local quantities gives
+$z=Dx$ and $u$. A diagonal weight matrix $W$, assembled from per-force
+weights $w_i$, controls the augmented-Lagrangian penalty and convergence.
 
 The main state has a direct representation in `System`:
 
 | Mathematical quantity | Code |
 | --- | --- |
-| \(x\), global positions | `System::m_x` and local `curr_x` |
-| \(v\), global velocities | `System::m_v` |
-| \(M\), diagonal mass matrix | `System::m_masses` |
-| \(D\), stacked reduction matrix | `System::m_D` |
-| \(W\), diagonal ADMM weights | `System::m_W_diag` |
-| \(z\), local primal variables | `System::curr_z` |
-| \(u\), scaled dual variables | `System::curr_u` |
+| $x$, global positions | `System::m_x` and local `curr_x` |
+| $v$, global velocities | `System::m_v` |
+| $M$, diagonal mass matrix | `System::m_masses` |
+| $D$, stacked reduction matrix | `System::m_D` |
+| $W$, diagonal ADMM weights | `System::m_W_diag` |
+| $z$, local primal variables | `System::curr_z` |
+| $u$, scaled dual variables | `System::curr_u` |
 
 ### 3. Local step
 
-For fixed \(x\), every energy term independently solves a small proximal
+For fixed $x$, every energy term independently solves a small proximal
 problem of the form
 
-```math
-z_i \leftarrow \underset{z}{\operatorname{argmin}}\;
-\Delta t^2 U_i(z) + \frac{w_i^2}{2}
-\lVert D_i x-z+u_i\rVert^2,
-```
+$$z_i \leftarrow \operatorname*{argmin}_{z}\left(\Delta t^2 U_i(z) + \frac{w_i^2}{2}\left\lVert D_i x-z+u_i\right\rVert^2\right).$$
 
 followed by its dual update. This work is parallel over forces:
 
@@ -112,12 +100,9 @@ singular-value proximal problem using L-BFGS.
 
 ### 4. Global step
 
-For fixed \(z\) and \(u\), the position update is the sparse linear solve
+For fixed $z$ and $u$, the position update is the sparse linear solve
 
-```math
-\left(M+\Delta t^2 D^T W^T W D\right)x =
-M\tilde{x}+\Delta t^2D^TW^TW(z-u).
-```
+$$\left(M+\Delta t^2 D^T W^T W D\right)x = M\tilde{x}+\Delta t^2D^TW^TW(z-u).$$
 
 The left-hand matrix stays constant while the topology, timestep, masses, and
 weights remain unchanged. `System::initialize()` factorizes it once with
@@ -126,16 +111,14 @@ the right-hand side and calls `solver.solve()`.
 
 This prefactored global solve, together with parallel local projections, is the
 main reason the method retains the speed and structure of projective dynamics.
-For projective-dynamics energies, choosing \(w_i=\sqrt{k_i}\) gives nearly the
+For projective-dynamics energies, choosing $w_i=\sqrt{k_i}$ gives nearly the
 same iteration; for affine constraint manifolds the two methods are identical.
 
 ### 5. Finish the timestep
 
 After the configured number of ADMM iterations, the code updates
 
-```math
-v^{n+1}=\frac{x^{n+1}-x^n}{\Delta t}, \qquad x^n\leftarrow x^{n+1}.
-```
+$$v^{n+1}=\frac{x^{n+1}-x^n}{\Delta t}, \qquad x^n\leftarrow x^{n+1}.$$
 
 `SimContext::update()` then copies the solver positions back into the render
 meshes and refreshes the scene objects.
@@ -146,7 +129,7 @@ meshes and refreshes the scene objects.
 | --- | --- |
 | Implicit objective and Algorithm 1 | `deps/admm-elastic-sca/src/system/System.cpp` |
 | Global variables, matrices, and factorization | `deps/admm-elastic-sca/src/system/System.hpp` |
-| \(D_i\), \(w_i\), \(U_i\), and local proximal interface | `Force::get_selector()` and `Force::project()` |
+| $D_i$, $w_i$, $U_i$, and local proximal interface | `Force::get_selector()` and `Force::project()` |
 | Parallel local step | OpenMP loop in `System::step()` |
 | Prefactored global step | `System::initialize()` and `solver.solve()` |
 | Triangle deformation energies | `TriangleForce.cpp` |
@@ -403,7 +386,7 @@ Objects refer to force definitions by name:
 | `density_weighted_mass` | Use area/volume-weighted masses (`1`) or uniform masses (`0`). |
 | Object `Force` | Name of a force definition applied to every relevant mesh element. |
 | `iterations` | Number of local/global ADMM iterations per simulation timestep. |
-| `timestep` | Fixed simulation timestep \(\Delta t\), in seconds. |
+| `timestep` | Fixed simulation timestep $\Delta t$, in seconds. |
 | `realtime` | If true, take enough fixed steps to cover the current rendered-frame time. |
 | `verbose` | Solver output level. |
 | `stiffness` | Energy stiffness for springs, strain, bending, or volume forces. |
@@ -424,8 +407,8 @@ To add a new implicit energy:
 
 1. Derive a class from `admm::Force`.
 2. In `initialize()`, compute rest-state data and a suitable ADMM weight.
-3. In `get_selector()`, append the rows of \(D_i\) and the corresponding
-   diagonal entries of \(W\).
+3. In `get_selector()`, append the rows of $D_i$ and the corresponding
+   diagonal entries of $W$.
 4. In `project()`, solve the local proximal problem and update the relevant
    slices of `z` and `u`.
 5. Teach `ForceBuilder` how to construct the new force from XML.
