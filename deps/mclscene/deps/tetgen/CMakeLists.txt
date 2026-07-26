@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10...4.0)
 
 # Build as a library
 add_definitions( -DTETLIBRARY )

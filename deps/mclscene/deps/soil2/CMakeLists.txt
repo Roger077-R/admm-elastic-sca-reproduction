@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.10...4.0)
 project(soil2 C)
 
 set( SOIL2_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR}/include PARENT_SCOPE )

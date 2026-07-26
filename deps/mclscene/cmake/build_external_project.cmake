@@ -11,7 +11,7 @@ function (build_external_project target sourcedir) #FOLLOWING ARGUMENTS are the 
 
     #generate false dependency project
     set(CMAKE_LIST_CONTENT "
-    cmake_minimum_required(VERSION 2.8)
+    cmake_minimum_required(VERSION 3.10...4.0)
 
     include(ExternalProject)
     ExternalProject_add(${target}

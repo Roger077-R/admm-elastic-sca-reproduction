@@ -19,7 +19,7 @@
 #
 # By Matt Overby (http://www.mattoverby.net)
 
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.10...4.0)
 project(mclscene C CXX)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
@@ -53,6 +53,15 @@ if(MCL_BUILD_RENDERING)
 	find_package(OpenGL 4)
 	find_package(GLFW 3)
 	find_package(GLEW)
+	# Modern GLEW config packages expose imported targets instead of the
+	# legacy GLEW_LIBRARIES/GLEW_INCLUDE_DIR variables.
+	if(TARGET GLEW::glew)
+		set(MCLSCENE_GLEW_TARGET GLEW::glew)
+		set(GLEW_LIBRARIES "")
+	elseif(TARGET GLEW::GLEW)
+		set(MCLSCENE_GLEW_TARGET GLEW::GLEW)
+		set(GLEW_LIBRARIES "")
+	endif()
 
 	# soil2, included in deps/
 	set( SOIL2_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/soil2" )
@@ -108,6 +117,9 @@ endif(MCL_BUILD_RENDERING)
 # Finally, include our needed files and add the library
 include_directories( ${MCLSCENE_INCLUDE_DIRS} )
 add_library( mclscene ${TRIMESH_SRCS} ${TETGEN_SRCS} ${MCLSCENE_SRCS} )
+if(MCLSCENE_GLEW_TARGET)
+	target_link_libraries(mclscene PUBLIC ${MCLSCENE_GLEW_TARGET})
+endif()
 
 # Set the libraries variable in parent scope if exists
 get_directory_property(HasParent PARENT_DIRECTORY)

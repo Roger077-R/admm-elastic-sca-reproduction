@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.10...4.0)
 project(trimesh CXX C)
-cmake_minimum_required(VERSION 2.6.2)
 
 #find_package(OpenGL REQUIRED)
 #find_package(GLUT REQUIRED)
