@@ -39,7 +39,7 @@ Let $x^n$ and $v^n$ be the current positions and velocities, $M$ the
 diagonal mass matrix, and $\Delta t$ the timestep. After explicit forces such
 as gravity and wind update the velocity, the unconstrained prediction is
 
-$$\tilde{x} = x^n + \Delta t\,v^n.$$
+$$\tilde{x} = x^n + \Delta t·v^n$$
 
 Implicit Euler can then be written as the minimization
 
