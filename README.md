@@ -39,17 +39,17 @@ Let \(x^n\) and \(v^n\) be the current positions and velocities, \(M\) the
 diagonal mass matrix, and \(\Delta t\) the timestep. After explicit forces such
 as gravity and wind update the velocity, the unconstrained prediction is
 
-$$
+```math
 \tilde{x} = x^n + \Delta t\,v^n.
-$$
+```
 
 Implicit Euler can then be written as the minimization
 
-$$
+```math
 x^{n+1} = \underset{x}{\operatorname{argmin}}\;
 \frac{1}{2\Delta t^2}\lVert M^{1/2}(x-\tilde{x})\rVert^2
 + \sum_i U_i(D_i x).
-$$
+```
 
 Each \(D_i\) extracts a small element-local quantity from the global position
 vector. For example, it can produce a spring edge, a triangle deformation
@@ -63,9 +63,9 @@ In the code, `System::step()` forms `x_bar` (the paper's \(\tilde{x}\)) and
 
 The method introduces local variables
 
-$$
+```math
 z_i = D_i x
-$$
+```
 
 and scaled dual variables \(u_i\). Stacking all local quantities gives
 \(z=Dx\) and \(u\). A diagonal weight matrix \(W\), assembled from per-force
@@ -88,11 +88,11 @@ The main state has a direct representation in `System`:
 For fixed \(x\), every energy term independently solves a small proximal
 problem of the form
 
-$$
+```math
 z_i \leftarrow \underset{z}{\operatorname{argmin}}\;
 \Delta t^2 U_i(z) + \frac{w_i^2}{2}
 \lVert D_i x-z+u_i\rVert^2,
-$$
+```
 
 followed by its dual update. This work is parallel over forces:
 
@@ -114,10 +114,10 @@ singular-value proximal problem using L-BFGS.
 
 For fixed \(z\) and \(u\), the position update is the sparse linear solve
 
-$$
+```math
 \left(M+\Delta t^2 D^T W^T W D\right)x =
 M\tilde{x}+\Delta t^2D^TW^TW(z-u).
-$$
+```
 
 The left-hand matrix stays constant while the topology, timestep, masses, and
 weights remain unchanged. `System::initialize()` factorizes it once with
@@ -133,9 +133,9 @@ same iteration; for affine constraint manifolds the two methods are identical.
 
 After the configured number of ADMM iterations, the code updates
 
-$$
+```math
 v^{n+1}=\frac{x^{n+1}-x^n}{\Delta t}, \qquad x^n\leftarrow x^{n+1}.
-$$
+```
 
 `SimContext::update()` then copies the solver positions back into the render
 meshes and refreshes the scene objects.
