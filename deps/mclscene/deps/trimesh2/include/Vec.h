@@ -869,8 +869,9 @@ static inline const T angle(const Vec<D,T> &v1, const Vec<D,T> &v2)
 }; // namespace trimesh
 
 
-// POSIX / C99 compatibility functions for MSVS
-#ifdef _WIN32
+// POSIX / C99 compatibility functions for MSVC only. MinGW provides these
+// functions through the standard library, so redefining them is ambiguous.
+#ifdef _MSC_VER
 #ifdef cbrt
 # undef cbrt
 #endif
@@ -919,7 +920,7 @@ inline long double trunc(long double x)
 {
 	return (x < 0.0f) ? (long double)(int(x)) : (long double)(int(x));
 }
-#endif // _WIN32
+#endif // _MSC_VER
 
 
 // Generic macros for declaring 1-, 2-, and 3- argument
