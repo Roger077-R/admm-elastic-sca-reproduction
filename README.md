@@ -43,7 +43,7 @@ $$\tilde{x} = x^n + \Delta t\,v^n.$$
 
 Implicit Euler can then be written as the minimization
 
-$$\begin{aligned} x^{n+1} = \operatorname*{argmin}_{x}\; &\frac{1}{2\Delta t^2}\left\lVert M^{1/2}(x-\tilde{x})\right\rVert^2 \\ &+ \sum_i U_i(D_i x). \end{aligned}$$
+$$\begin{aligned} x^{n+1} = \underset{x}{\mathrm{arg\,min}}\; &\frac{1}{2\Delta t^2}\left\lVert M^{1/2}(x-\tilde{x})\right\rVert^2 \\ &+ \sum_i U_i(D_i x). \end{aligned}$$
 
 Each $D_i$ extracts a small element-local quantity from the global position
 vector. For example, it can produce a spring edge, a triangle deformation
@@ -80,7 +80,7 @@ The main state has a direct representation in `System`:
 For fixed $x$, every energy term independently solves a small proximal
 problem of the form
 
-$$z_i \leftarrow \operatorname*{argmin}_{z}\left(\Delta t^2 U_i(z) + \frac{w_i^2}{2}\left\lVert D_i x-z+u_i\right\rVert^2\right).$$
+$$z_i \leftarrow \underset{z}{\mathrm{arg\,min}}\left(\Delta t^2 U_i(z) + \frac{w_i^2}{2}\left\lVert D_i x-z+u_i\right\rVert^2\right).$$
 
 followed by its dual update. This work is parallel over forces:
 
