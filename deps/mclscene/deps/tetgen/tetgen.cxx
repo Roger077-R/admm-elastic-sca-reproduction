@@ -4843,16 +4843,16 @@ void tetgenmesh::maketetrahedronmap(int*& idx2tetlist,
 
 void tetgenmesh::dummyinit(int tetwords, int shwords)
 {
-  unsigned long alignptr;
+  uintptr_t alignptr;
 
   // Set up 'dummytet', the 'tetrahedron' that occupies "outer space".
   dummytetbase = (tetrahedron *) new char[tetwords * sizeof(tetrahedron)
                                           + tetrahedrons->alignbytes];
   // Align 'dummytet' on a 'tetrahedrons->alignbytes'-byte boundary.
-  alignptr = (unsigned long) dummytetbase;
+  alignptr = (uintptr_t) dummytetbase;
   dummytet = (tetrahedron *)
-    (alignptr + (unsigned long) tetrahedrons->alignbytes
-     - (alignptr % (unsigned long) tetrahedrons->alignbytes));
+    (alignptr + (uintptr_t) tetrahedrons->alignbytes
+     - (alignptr % (uintptr_t) tetrahedrons->alignbytes));
   // Initialize the four adjoining tetrahedra to be "outer space". These
   //   will eventually be changed by various bonding operations, but their
   //   values don't really matter, as long as they can legally be
@@ -4874,10 +4874,10 @@ void tetgenmesh::dummyinit(int tetwords, int shwords)
     dummyshbase = (shellface *) new char[shwords * sizeof(shellface)
                                          + subfaces->alignbytes];
     // Align 'dummysh' on a 'subfaces->alignbytes'-byte boundary.
-    alignptr = (unsigned long) dummyshbase;
+    alignptr = (uintptr_t) dummyshbase;
     dummysh = (shellface *)
-      (alignptr + (unsigned long) subfaces->alignbytes
-       - (alignptr % (unsigned long) subfaces->alignbytes));
+      (alignptr + (uintptr_t) subfaces->alignbytes
+       - (alignptr % (uintptr_t) subfaces->alignbytes));
     // Initialize the three adjoining subfaces to be the omnipresent
     //   subface. These will eventually be changed by various bonding
     //   operations, but their values don't really matter, as long as they
@@ -15091,12 +15091,12 @@ void tetgenmesh::btree_sort(point* vertexarray, int arraysize, int axis,
 void tetgenmesh::btree_insert(point insertpt)
 {
   point *ptary;
-  long arylen; // The array lenhgth is saved in ptary[0].
+  uintptr_t arylen; // The array length is saved in ptary[0].
 
   // Get the tree node (save in this point).
   ptary = (point *) point2ppt(insertpt);
   // Get the current array length.
-  arylen = (long) ptary[0];
+  arylen = (uintptr_t) ptary[0];
   // Insert the point into the node.
   ptary[arylen + 1] = insertpt;
   // Increase the array length by 1.
@@ -15115,13 +15115,13 @@ void tetgenmesh::btree_search(point insertpt, triface* searchtet)
   point nearpt, candpt;
   REAL dist2, mindist2;
   int ptsamples, ptidx;
-  long arylen;
+  uintptr_t arylen;
   int i;
 
   // Get the tree node (save in this point).
   ptary = (point *) point2ppt(insertpt);
   // Get the current array length.
-  arylen = (long) ptary[0];
+  arylen = (uintptr_t) ptary[0];
 
   if (arylen == 0) {
     searchtet->tet = NULL;
@@ -15156,7 +15156,8 @@ void tetgenmesh::btree_search(point insertpt, triface* searchtet)
   }
 
   if (b->verbose > 1) {
-    printf("    Get point %d (cell size %ld).\n", pointmark(nearpt), arylen);
+    printf("    Get point %d (cell size %llu).\n", pointmark(nearpt),
+           (unsigned long long) arylen);
   }
 
   decode(point2tet(nearpt), *searchtet);
@@ -15174,7 +15175,7 @@ void tetgenmesh::ordervertices(point* vertexarray, int arraysize)
 {
   point **ipptary, **jpptary, *swappptary; 
   point *ptary;
-  long arylen;
+  uintptr_t arylen;
   int index, i, j;
 
   // First pick one vertex from each tree node.
@@ -15195,7 +15196,7 @@ void tetgenmesh::ordervertices(point* vertexarray, int arraysize)
     jpptary = (point **) fastlookup(btreenode_list, j);
     // Order the points in the node.
     ptary = *jpptary;
-    arylen = (long) ptary[0];
+    arylen = (uintptr_t) ptary[0];
     for (j = 2; j <= arylen; j++) { // Skip the first point.
       vertexarray[index] = ptary[j];
       index++;
@@ -21115,7 +21116,7 @@ bool tetgenmesh::delaunizecavity(arraypool *cavpoints, arraypool *cavfaces,
         if (checksh.sh != dummysh) {
           if (b->verbose > 1) {
             printf("    Queue a subface x%lx (%d, %d, %d).\n", 
-              (unsigned long) checksh.sh, pointmark(sorg(checksh)),
+              (uintptr_t) checksh.sh, pointmark(sorg(checksh)),
               pointmark(sdest(checksh)), pointmark(sapex(checksh)));
           }
           stdissolve(checksh);
@@ -21165,7 +21166,7 @@ bool tetgenmesh::delaunizecavity(arraypool *cavpoints, arraypool *cavfaces,
             if (checksh.sh != dummysh) {
               if (b->verbose > 1) {
                 printf("    Queue a subface x%lx (%d, %d, %d).\n", 
-                  (unsigned long) checksh.sh, pointmark(sorg(checksh)),
+                  (uintptr_t) checksh.sh, pointmark(sorg(checksh)),
                   pointmark(sdest(checksh)), pointmark(sapex(checksh)));
               }
               stdissolve(checksh);
@@ -23558,7 +23559,7 @@ bool tetgenmesh::carvecavity(list* newtetlist, list* outtetlist,
             // Found an inversed inside tet. Stop and return.
             if (b->verbose > 1) {
               printf("    Intet x%lx %d (%d, %d, %d, %d) is iversed.\n", 
-                (unsigned long) intet.tet, intet.loc, pointmark(pa),
+                (uintptr_t) intet.tet, intet.loc, pointmark(pa),
                 pointmark(pb), pointmark(pc), pointmark(oppo(intet)));
             }
             success = false;
@@ -23628,7 +23629,7 @@ bool tetgenmesh::carvecavity(list* newtetlist, list* outtetlist,
         if (infected(neightet)) {
           printf("Error:  A front face (%d, %d, %d) x%lx got deleted.\n",
             pointmark(org(neightet)), pointmark(dest(neightet)),
-            pointmark(apex(neightet)), (unsigned long) auxsh.sh);
+            pointmark(apex(neightet)), (uintptr_t) auxsh.sh);
           printf("  p:draw_tet(%d, %d, %d, %d) -- in\n",
             pointmark(org(neightet)), pointmark(dest(neightet)), 
             pointmark(apex(neightet)), pointmark(oppo(neightet)));
@@ -33805,9 +33806,9 @@ int tetgenmesh::checksegments()
                 ((org(tetloop) == pb) && (dest(tetloop) == pa)))) {
             printf("  !! Wrong tet-seg connection.\n");
             printf("    Tet: x%lx (%d, %d, %d, %d) - Seg: x%lx (%d, %d).\n", 
-              (unsigned long) tetloop.tet, pointmark(org(tetloop)),
+              (uintptr_t) tetloop.tet, pointmark(org(tetloop)),
               pointmark(dest(tetloop)), pointmark(apex(tetloop)),
-              pointmark(oppo(tetloop)), (unsigned long) sseg.sh,
+              pointmark(oppo(tetloop)), (uintptr_t) sseg.sh,
               pointmark(pa), pointmark(pb));
             horrors++;
           } else {
@@ -33819,11 +33820,11 @@ int tetgenmesh::checksegments()
               if (checkseg.sh != sseg.sh) {
                 printf("  !! Wrong tet-seg connection.\n");
                 printf("    Tet: x%lx (%d, %d, %d, %d) - ", 
-                  (unsigned long) tetloop.tet, pointmark(org(tetloop)),
+                  (uintptr_t) tetloop.tet, pointmark(org(tetloop)),
                   pointmark(dest(tetloop)), pointmark(apex(tetloop)),
                   pointmark(oppo(tetloop)));
                 if (checkseg.sh != NULL) {
-                  printf("Seg x%lx (%d, %d).\n", (unsigned long) checkseg.sh,
+                  printf("Seg x%lx (%d, %d).\n", (uintptr_t) checkseg.sh,
                   pointmark(sorg(checkseg)), pointmark(sdest(checkseg))); 
                 } else {
                   printf("Seg: NULL.\n");

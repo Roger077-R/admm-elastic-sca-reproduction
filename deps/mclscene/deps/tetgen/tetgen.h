@@ -3355,7 +3355,7 @@ inline bool tetgenmesh::isfacehasedge(face* s, point tend1, point tend2) {
 
 inline bool tetgenmesh::issymexist(triface* t) {
   tetrahedron *ptr = (tetrahedron *) 
-    ((unsigned long)(t->tet[t->loc]) & ~(unsigned long)7l);
+    ((uintptr_t)(t->tet[t->loc]) & ~(uintptr_t) 7);
   return ptr != dummytet;
 }
 
