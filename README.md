@@ -144,7 +144,7 @@ meshes and refreshes the scene objects.
 | Scene/XML to solver assembly | `src/SimContext.cpp` and `src/ForceBuilder.cpp` |
 | Visualization and input | `deps/mclscene/src/Application.cpp` |
 
-## How to read the code
+## Reading guide
 
 The shortest useful route through the project is the windy-flag example:
 
