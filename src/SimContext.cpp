@@ -42,7 +42,7 @@ void SimContext::load( std::string config_file ){
 	//	First, we want to load any force properties and store them in force_param_map
 	//
 	pugi::xml_document doc;
-	pugi::xml_parse_result result = doc.load_file(config_file.c_str());
+	pugi::xml_parse_result result = doc.load_file(config_file.c_str()); // c_str() converts std::string to const char* for pugi::xml_document::load_file. So it will load the XML file and parse it into a pugi::xml_document object. The result will indicate whether the parsing was successful or not.
 	if( !result ){ throw std::runtime_error("\n**SimContext::load Error: Unable to load "+config_file); }
 
 	// Get the node that stores sim info

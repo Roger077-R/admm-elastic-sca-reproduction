@@ -26,10 +26,10 @@ using namespace admm;
 void key_callback( GLFWwindow* window, int key, int scancode, int action, int mods );
 void step_callback( System *system );
 
-std::unique_ptr<SimContext> context;
-std::unique_ptr<mcl::Application> app;
-std::shared_ptr<ExplicitForce> wind;
-Eigen::Vector3d orig_wind(10,0,2);
+std::unique_ptr<SimContext> context; // Unique pointer does not require manual deletion, and is automatically deleted when the program exits
+std::unique_ptr<mcl::Application> app; // Create a global pointer
+std::shared_ptr<ExplicitForce> wind; 
+Eigen::Vector3d orig_wind(10,0,2); // Use standard library to create a vector with the original wind direction and magnitude
 void setup();
 bool high_winds = false;
 
@@ -44,9 +44,9 @@ int main(int argc, char *argv[]){
 	context->load( conf_ss.str() );
 	setup();
 	context->settings.run_realtime = false;
-	context->initialize();
+	context->initialize(); // Gives the system a chance to compute global matrices and precompute the solver. This is important for performance, as it avoids recomputing these matrices every frame.
 
-	app = std::unique_ptr<mcl::Application>( new mcl::Application( context->scene.get(), context.get() ) );
+	app = std::unique_ptr<mcl::Application>( new mcl::Application( context->scene.get(), context.get() ) ); // Scene and simulation context are passed to the application. The application will use these to render the scene and run the simulation.
 	app->settings.gamma_correction = false;
 	app->zoom = 6.f;
 
