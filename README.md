@@ -164,6 +164,29 @@ After this path, inspect one analytic local model such as
 `LimitedTriangleStrain::project()`, followed by the nonlinear
 `HyperElasticTet::project()` path.
 
+## A workflow for parsing XML files
+```
+windyflag.cpp::main()
+    ↓
+SimContext::load("cloth.xml")
+    ├─ Parse force configuration from <admmelastic> → force_param_map
+    └─ Call scene->load()
+           ↓
+    SceneManager::load()
+        ↓
+    Parse each <Object> in <mclScene>
+        ↓
+    Callback ForceBuilder::admm_build_object()
+        ├─ Create mesh (30×20 plane)
+        ├─ Add vertices to System (x, v, masses)
+        └─ For each force type call `build_trimesh()
+               ↓
+           ForceBuilder::build_trimesh()
+               ├─ Iterate over all triangle faces
+               └─ Create Force object for each face and add to System
+
+System ready → Start physics simulation.
+```
 ## Forces and material models
 
 All implicit forces derive from `admm::Force`. Each force supplies rows of the
