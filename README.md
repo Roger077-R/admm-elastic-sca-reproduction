@@ -123,6 +123,12 @@ $$v^{n+1}=\frac{x^{n+1}-x^n}{\Delta t}, \qquad x^n\leftarrow x^{n+1}.$$
 `SimContext::update()` then copies the solver positions back into the render
 meshes and refreshes the scene objects.
 
+### 6. Difference between **timestep** and **frame**
+- Frame : Show new picture on the screen
+- Simulation timestep : The physical simulation has advanced one step.
+- ADMM iteration : How many iterations are done in one timestep. In the code we set 30 iterations per one timestep
+
+
 ## Paper-to-code map
 
 | Paper concept | Implementation |
@@ -187,6 +193,24 @@ SimContext::load("cloth.xml")
 
 System ready → Start physics simulation.
 ```
+
+## A workflow on how to compute the matrices
+```
+XML + Mesh file
+      ↓
+mcl::SceneManager reads the scene
+      ↓
+ForceBuilder extracts vertices, masses, faces/tetrahedra, material parameters
+      ↓
+admm::System::m_x / m_masses / forces
+      ↓
+Each Force::get_selector() submits local data of D and W
+      ↓
+System::initialize() assembles and factorizes the global matrix
+      ↓
+System::step() performs matrix multiplication and linear solve per frame
+```
+
 ## Forces and material models
 
 All implicit forces derive from `admm::Force`. Each force supplies rows of the
@@ -284,6 +308,10 @@ $env:PATH = "C:\tools\msys64\ucrt64\bin;$env:PATH"
 
 Adjust `C:\tools\msys64` if MSYS2 is installed elsewhere.
 
+### 4.Remark
+Make sure that you are usiing `MSYS2 UCRT64` terminal. If you are in `MSYS` terminal. Input `/ucrt64.exe` and it will go to the correct terminal.
+
+
 ## Build on Ubuntu or Debian
 
 Install the compiler, CMake, Ninja, and rendering dependencies:
@@ -380,7 +408,7 @@ Objects refer to force definitions by name:
 ```xml
 <Object name="cloth1" type="plane">
     <width value="30" />
-    <length value="20" />
+    <length value="20" /> <!-- Here is a squre-->
     <Mass value=".5" />
     <Force value="admmstyle" />
     <Force value="bend" />
